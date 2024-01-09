@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Extengerator.Sample</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Extengerator\Extengerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="DDD.UbiquitousLanguageRegistry.txt"/>
+        <AdditionalFiles Include="DDD.UbiquitousLanguageRegistry.txt"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <None Remove="Extengerator.settings.json"/>
+        <AdditionalFiles Include="Extengerator.settings.json"/>
+    </ItemGroup>
+
+</Project>
