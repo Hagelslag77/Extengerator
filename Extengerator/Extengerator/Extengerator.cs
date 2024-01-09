@@ -8,7 +8,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Newtonsoft.Json;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Extengerator;
 
@@ -29,7 +30,7 @@ public class Extengerator : IIncrementalGenerator
     {
         //config reading
         var namesAndContents = context.AdditionalTextsProvider
-            .Where(a => a.Path.EndsWith("Extengerator.settings.json"))
+            .Where(a => a.Path.EndsWith("Extengerator.settings.yaml"))
             .Select((text, cancellationToken)
                 => (name: Path.GetFileNameWithoutExtension(text.Path),
                     content: text.GetText(cancellationToken)?.ToString()))
@@ -52,14 +53,15 @@ public class Extengerator : IIncrementalGenerator
         var file = arg.file;
         var typeList = arg.typeList;
         
-        //TODO AK: think about using yaml as it supports multi line strings
         //TODO AK: error hanlding
-        var configurations = JsonConvert.DeserializeObject<List<Configuration>>(file.content);
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .Build();
+
+        var configurations = deserializer.Deserialize<List<Configuration>>(file.content);
         
         if (typeList.IsDefaultOrEmpty || !typeList.Any())
             return;
-
-        var sb = new StringBuilder();
 
         foreach (var configuration in configurations)
             CreateCodeForConfiguration(context, typeList, configuration);

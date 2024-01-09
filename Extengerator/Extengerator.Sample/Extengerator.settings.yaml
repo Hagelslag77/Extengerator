@@ -1,0 +1,39 @@
+- interfaceType: Api.OGame.ResponseFilters.IResponseFilter
+  template: |-
+    using Zenject;
+
+    namespace Api.OGame.ResponseFilters
+    {{
+      public static partial class ResponseFilterReceiverExtensions
+      {{
+          public static void AddFilters(this IResponseFilterReceiver extend ,DiContainer container )
+          {{
+             {0}
+          }}
+      }}
+    }} 
+  replacer:
+    - 'extend.AddResponseFilterLast(container.Instantiate<{0}>());'
+  fileName: ResponseFilterReceiverExtensions
+- interfaceType: Api.OGame.ResponseFilters.IResponseFilter
+  template: |-
+    using Zenject;
+
+    namespace Api.OGame.ResponseFilters
+    {{
+      public static partial class ResponseFilterReceiverExtensions2
+      {{
+        public static void AddFilter2s(this IResponseFilterReceiver extend, DiContainer container )
+        {{
+          {0}
+        }}
+      }}
+    }}
+
+    /*
+    {1}
+    */
+  replacer:
+    - 'extend.AddResponseFilterFirst(container.Instantiate<{0}>());'
+    - 'added class {0}'
+  fileName: ResponseFilterReceiverExtensions3

@@ -16,8 +16,8 @@
     </ItemGroup>
     
     <ItemGroup>
-        <None Remove="Extengerator.settings.json"/>
-        <AdditionalFiles Include="Extengerator.settings.json"/>
+        <None Remove="Extengerator.settings.yaml"/>
+        <AdditionalFiles Include="Extengerator.settings.yaml"/>
     </ItemGroup>
 
 </Project>
