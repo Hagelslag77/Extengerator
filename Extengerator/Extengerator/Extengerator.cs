@@ -1,77 +1,112 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Extengerator.Common.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+
+using Context = Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext;
 
 namespace Extengerator;
 
 [Generator]
 public class Extengerator : IIncrementalGenerator
 {
+    #region Initialization
 
-
-    //TODO AK: ImmutableArray<string> Interfaces Replacer?
-    private readonly record struct Configuration(string InterfaceType, string Template, string[] Replacer, string FileName);
-    private readonly record struct Target(string Class, IEnumerable<string> Interfaces, bool IsValid = true);
-
-
-    private static readonly Target DefaultError = new Target("", Enumerable.Empty<string>(), false);
-    
-
-    public void Initialize(IncrementalGeneratorInitializationContext context)
+    public void Initialize(Context context)
     {
-        //config reading
-        var namesAndContents = context.AdditionalTextsProvider
+        var namesAndContents = CreateAdditionalTextProvider(context);
+        var apiClasses = CreateSyntaxProvider(context);
+
+        context.RegisterSourceOutput(namesAndContents.Combine(apiClasses), GenerateCode);
+    }
+
+    private static IncrementalValuesProvider<string> CreateAdditionalTextProvider(Context context)
+    {
+        return context.AdditionalTextsProvider
             .Where(a => a.Path.EndsWith("Extengerator.settings.yaml"))
             .Select((text, cancellationToken)
-                => (name: Path.GetFileNameWithoutExtension(text.Path),
-                    content: text.GetText(cancellationToken)?.ToString()))
-            .Where(tuple => tuple.content is not null);
-        
+                => text.GetText(cancellationToken)?.ToString())
+            .Where(content => content is not null)!;
+    }
 
-        //creating code
-        var apiClasses = context.SyntaxProvider
+    private static IncrementalValueProvider<ImmutableArray<Target>> CreateSyntaxProvider(Context context)
+    {
+        return context.SyntaxProvider
             .CreateSyntaxProvider(predicate: static (s, _) => IsTarget(s),
-                transform: (n, cn) => GetTarget(n, cn))
+                transform: static (n, cn) => GetTarget(n, cn))
             .Where(static m => m.IsValid)
             .Collect();
-        
-        context.RegisterSourceOutput(namesAndContents.Combine(apiClasses), Execute!);
-
-    }
-
-    private void Execute(SourceProductionContext context, ((string name, string? content) file, ImmutableArray<Target> typeList) arg)
-    {
-        var file = arg.file;
-        var typeList = arg.typeList;
-        
-        //TODO AK: error hanlding
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .Build();
-
-        var configurations = deserializer.Deserialize<List<Configuration>>(file.content);
-        
-        if (typeList.IsDefaultOrEmpty || !typeList.Any())
-            return;
-
-        foreach (var configuration in configurations)
-            CreateCodeForConfiguration(context, typeList, configuration);
     }
     
-    private static void CreateCodeForConfiguration(SourceProductionContext context, ImmutableArray<Target> typeList,
+    private static bool IsTarget(SyntaxNode node) => node is ClassDeclarationSyntax;
+    
+    private static Target GetTarget(GeneratorSyntaxContext ctx, CancellationToken cn)
+    {
+        var syntax = (ClassDeclarationSyntax) ctx.Node;
+        var symbol = ctx.SemanticModel.GetDeclaredSymbol(syntax, cn);
+
+        if (symbol is null || symbol.IsAbstract || !symbol.AllInterfaces.Any())
+            return Target.DefaultError;
+
+        return new Target(symbol.ToDisplayString(), symbol.AllInterfaces.Select(i => i.ToDisplayString()));
+    }
+    
+    #endregion
+
+    #region Generation
+    
+    private static void GenerateCode(SourceProductionContext context,
+        (string  content, ImmutableArray<Target> typeList) arg)
+    {
+        var typeList = arg.typeList;
+        if (typeList.IsDefaultOrEmpty)
+            return;
+
+        var configurations = DeserializeAdditionalText(arg.content);
+        foreach (var configuration in configurations)
+            GenerateCodeForConfiguration(context, typeList, configuration);
+    }
+
+    private static List<Configuration> DeserializeAdditionalText(string content)
+    {
+        try
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+
+            var configurations = deserializer.Deserialize<List<Configuration>>(content);
+            return configurations;
+        }
+        catch (YamlException e)
+        {
+            //TODO: error handling
+            Console.WriteLine(e);
+            throw;
+        }
+        catch (Exception e)
+        {
+            //TODO: error handling
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    private static void GenerateCodeForConfiguration(SourceProductionContext context,
+        ImmutableArray<Target> typeList,
         Configuration conf)
     {
         context.CancellationToken.ThrowIfCancellationRequested();
-        
+
         //TODO AK: clean up
         var replaced = new object[conf.Replacer.Length];
         for (var i = 0; i < conf.Replacer.Length; i++)
@@ -80,10 +115,12 @@ public class Extengerator : IIncrementalGenerator
             // ReSharper disable once ForCanBeConvertedToForeach
             for (var j = 0; j < typeList.Length; j++)
             {
+                context.CancellationToken.ThrowIfCancellationRequested();
+                
                 var clazz = typeList[j];
-                if(!clazz.Interfaces.Contains(conf.InterfaceType))
+                if (!clazz.Interfaces.Contains(conf.InterfaceType))//TODO AK: error handling
                     continue;
-            
+
                 //TODO AK: error handling
                 builder.AppendFormat(conf.Replacer[i], clazz.Class);
             }
@@ -93,29 +130,12 @@ public class Extengerator : IIncrementalGenerator
 
         //TODO AK: error handling
         var theCode = string.Format(conf.Template, replaced);
-        
-        theCode = CSharpSyntaxTree.ParseText(theCode).GetRoot().NormalizeWhitespace().ToFullString();
-        context.AddSource($"{conf.FileName}.g.cs", SourceText.From(theCode, Encoding.UTF8));
+
+        context.AddSourceNormalized($"{conf.FileName}.g.cs", theCode);
     }
-
-
-    private static bool IsTarget(SyntaxNode node) => node is ClassDeclarationSyntax;
     
     
-    private static Target GetTarget(GeneratorSyntaxContext ctx, CancellationToken cn)
-    {
-        
-        var syntax = (ClassDeclarationSyntax)ctx.Node;
-        var symbol = ctx.SemanticModel.GetDeclaredSymbol(syntax, cn);
-
-        if (symbol is null ||symbol.IsAbstract || !symbol.AllInterfaces.Any()) 
-            return DefaultError;
-
-        return new Target(symbol.ToDisplayString(), symbol.AllInterfaces.Select(i => i.ToDisplayString()));
-        
-    }
-
-
+    #endregion
 
     // private static void ReportWarning(SourceProductionContext context, (string Name, bool Warn, bool Valid) api)
     // {
