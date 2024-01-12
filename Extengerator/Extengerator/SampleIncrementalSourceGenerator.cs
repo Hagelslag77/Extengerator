@@ -60,7 +60,6 @@ namespace {Namespace}
 
     private void ProcessAdditionalFiles(SourceProductionContext context, (string name, string content) arg2)
     {
-        int i = 0;
     }
 
     /// <summary>

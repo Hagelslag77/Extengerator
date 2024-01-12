@@ -4,6 +4,6 @@ public sealed class DiContainer
 {
     public T Instantiate<T>()
     {
-        return default;
+        return default!;
     }
 }

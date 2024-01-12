@@ -17,12 +17,12 @@ public partial class SampleEntity : Foo
     public int Id { get; } = 42;
     public string? Name { get; } = "Sample";
 
-    public IResponseFilterReceiver filter;
-    public DiContainer Container = new ();
+    private readonly IResponseFilterReceiver? _filter = null;
+    private readonly DiContainer _container = new ();
     
     void Foo()
     {
-       // filter.AddFilters(Container);
+       _filter?.AddFilters(_container);
     }
 }
 
