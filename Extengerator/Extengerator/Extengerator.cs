@@ -72,13 +72,15 @@ public class Extengerator : IIncrementalGenerator
             return;
 
         var configurations = DeserializeAdditionalText(arg.content);
+        if(configurations is null)
+            return;
         
         // ReSharper disable once ForCanBeConvertedToForeach
         for (var i = 0; i < configurations.Count; ++i)
             GenerateCodeForConfiguration(context, typeList, configurations[i]);
     }
 
-    private static List<Configuration> DeserializeAdditionalText(string content)
+    private static List<Configuration>? DeserializeAdditionalText(string content)
     {
         try
         {
@@ -86,20 +88,19 @@ public class Extengerator : IIncrementalGenerator
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
 
-            var configurations = deserializer.Deserialize<List<Configuration>>(content);
-            return configurations;
+            return deserializer.Deserialize<List<Configuration>>(content);
         }
         catch (YamlException e)
         {
             //TODO: error handling
             Console.WriteLine(e);
-            throw;
+            return null;
         }
         catch (Exception e)
         {
             //TODO: error handling
             Console.WriteLine(e);
-            throw;
+            return null;
         }
     }
 
@@ -109,14 +110,35 @@ public class Extengerator : IIncrementalGenerator
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
-        var replaced = new object[conf.Replacer.Length];
+        if (!conf.IsValid())
+        {
+            //TODO AK: error handling
+            return;
+        }
+
+        var replaced = new object[conf.Replacer!.Length];
         for (var i = 0; i < conf.Replacer.Length; ++i)
-            replaced[i] = ApplyReplacer(context, typeList, conf.Replacer[i], conf.InterfaceType);
+            replaced[i] = ApplyReplacer(context, typeList, conf.Replacer[i], conf.InterfaceType!);
 
-        //TODO AK: error handling
-        var theCode = string.Format(conf.Template, replaced);
-
-        context.AddSourceNormalized($"{conf.FileName}.g.cs", theCode);
+        try
+        {
+            var sourceCode = string.Format(conf.Template!, replaced);
+            context.AddSourceNormalized($"{conf.FileName}.g.cs", sourceCode);
+        }
+        catch (ArgumentNullException e)
+        {
+            //TODO AK: error handling
+            //conf.Template is null
+            Console.WriteLine(e);
+            throw;
+        }
+        catch (FormatException e)
+        {
+            //TODO AK: error handling
+            //The format item in conf.Template is invalid. or The index of a format item is not zero.
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     private static string ApplyReplacer(SourceProductionContext context,
@@ -132,11 +154,35 @@ public class Extengerator : IIncrementalGenerator
             context.CancellationToken.ThrowIfCancellationRequested();
                 
             var target = typeList[i];
-            if (!target.Interfaces.Contains(interfaceType))//TODO AK: error handling
+            if (!target.Interfaces.Contains(interfaceType))
                 continue;
 
             //TODO AK: error handling
-            builder.AppendFormat(replacer, target.Class);
+            try
+            {
+                builder.AppendFormat(replacer, target.Class);
+            }
+            catch (ArgumentNullException e)
+            {
+                //TODO AK: error handling
+                //replacer is null
+                Console.WriteLine(e);
+                throw;
+            }
+            catch (FormatException e)
+            {
+                //TODO AK: error handling
+                //The format item in replacer is invalid. or The index of a format item is not zero.
+                Console.WriteLine(e);
+                throw;
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                //TODO AK: error handling
+                //The length of the expanded string would exceed MaxCapacity.
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         return builder.ToString();
