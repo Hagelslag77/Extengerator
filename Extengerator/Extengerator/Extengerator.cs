@@ -72,8 +72,10 @@ public class Extengerator : IIncrementalGenerator
             return;
 
         var configurations = DeserializeAdditionalText(arg.content);
-        foreach (var configuration in configurations)
-            GenerateCodeForConfiguration(context, typeList, configuration);
+        
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var i = 0; i < configurations.Count; ++i)
+            GenerateCodeForConfiguration(context, typeList, configurations[i]);
     }
 
     private static List<Configuration> DeserializeAdditionalText(string content)
@@ -107,34 +109,39 @@ public class Extengerator : IIncrementalGenerator
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
-        //TODO AK: clean up
         var replaced = new object[conf.Replacer.Length];
-        for (var i = 0; i < conf.Replacer.Length; i++)
-        {
-            StringBuilder builder = new();
-            // ReSharper disable once ForCanBeConvertedToForeach
-            for (var j = 0; j < typeList.Length; j++)
-            {
-                context.CancellationToken.ThrowIfCancellationRequested();
-                
-                var clazz = typeList[j];
-                if (!clazz.Interfaces.Contains(conf.InterfaceType))//TODO AK: error handling
-                    continue;
-
-                //TODO AK: error handling
-                builder.AppendFormat(conf.Replacer[i], clazz.Class);
-            }
-
-            replaced[i] = builder.ToString();
-        }
+        for (var i = 0; i < conf.Replacer.Length; ++i)
+            replaced[i] = ApplyReplacer(context, typeList, conf.Replacer[i], conf.InterfaceType);
 
         //TODO AK: error handling
         var theCode = string.Format(conf.Template, replaced);
 
         context.AddSourceNormalized($"{conf.FileName}.g.cs", theCode);
     }
-    
-    
+
+    private static string ApplyReplacer(SourceProductionContext context,
+        ImmutableArray<Target> typeList, 
+        string replacer,
+        string interfaceType)
+    {
+        StringBuilder builder = new();
+        
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var i = 0; i < typeList.Length; ++i)
+        {
+            context.CancellationToken.ThrowIfCancellationRequested();
+                
+            var target = typeList[i];
+            if (!target.Interfaces.Contains(interfaceType))//TODO AK: error handling
+                continue;
+
+            //TODO AK: error handling
+            builder.AppendFormat(replacer, target.Class);
+        }
+
+        return builder.ToString();
+    }
+
     #endregion
 
     // private static void ReportWarning(SourceProductionContext context, (string Name, bool Warn, bool Valid) api)
