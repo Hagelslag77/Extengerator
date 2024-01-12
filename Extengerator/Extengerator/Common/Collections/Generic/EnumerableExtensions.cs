@@ -23,6 +23,17 @@ public static class EnumerableExtensions
     {
         return source is null || source.IsEmpty();
     }
+    
+    public static bool IsNullOrEmpty<T>(this T[]? source)
+    {
+        return source is null || source.Length == 0;
+    }
+    
+    public static bool IsNullOrEmpty<T>(this IList<T>? source)
+    {
+        return source is null || source.Count == 0;
+    }
+    
 
     public static int GetSequenceEqualHashCode<T>(this IEnumerable<T>? source)
     {
@@ -35,4 +46,5 @@ public static class EnumerableExtensions
                 => (acc * 397) ^ (curr?.GetHashCode() ?? 0));
         } 
     }
+
 }
