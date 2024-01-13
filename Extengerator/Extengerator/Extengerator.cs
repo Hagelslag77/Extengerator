@@ -8,10 +8,8 @@ using Extengerator.Common.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-
 using Context = Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext;
 
 namespace Extengerator;
@@ -46,9 +44,9 @@ public class Extengerator : IIncrementalGenerator
             .Where(static m => m.IsValid)
             .Collect();
     }
-    
+
     private static bool IsTarget(SyntaxNode node) => node is ClassDeclarationSyntax;
-    
+
     private static Target GetTarget(GeneratorSyntaxContext ctx, CancellationToken cn)
     {
         var syntax = (ClassDeclarationSyntax) ctx.Node;
@@ -59,28 +57,28 @@ public class Extengerator : IIncrementalGenerator
 
         return new Target(symbol.ToDisplayString(), symbol.AllInterfaces.Select(i => i.ToDisplayString()));
     }
-    
+
     #endregion
 
     #region Generation
-    
+
     private static void GenerateCode(SourceProductionContext context,
-        (string  content, ImmutableArray<Target> typeList) arg)
+        (string content, ImmutableArray<Target> typeList) arg)
     {
         var typeList = arg.typeList;
         if (typeList.IsDefaultOrEmpty)
             return;
 
-        var configurations = DeserializeAdditionalText(arg.content);
-        if(configurations is null)
+        var configurations = DeserializeAdditionalText(context, arg.content);
+        if (configurations is null)
             return;
-        
+
         // ReSharper disable once ForCanBeConvertedToForeach
         for (var i = 0; i < configurations.Count; ++i)
             GenerateCodeForConfiguration(context, typeList, configurations[i]);
     }
 
-    private static List<Configuration>? DeserializeAdditionalText(string content)
+    private static List<Configuration>? DeserializeAdditionalText(SourceProductionContext context, string content)
     {
         try
         {
@@ -90,16 +88,9 @@ public class Extengerator : IIncrementalGenerator
 
             return deserializer.Deserialize<List<Configuration>>(content);
         }
-        catch (YamlException e)
-        {
-            //TODO: error handling
-            Console.WriteLine(e);
-            return null;
-        }
         catch (Exception e)
         {
-            //TODO: error handling
-            Console.WriteLine(e);
+            ReportSettingsWarning(context, e.Message);
             return null;
         }
     }
@@ -112,7 +103,7 @@ public class Extengerator : IIncrementalGenerator
 
         if (!conf.IsValid())
         {
-            //TODO AK: error handling
+            ReportSettingsWarning(context, "Invalid configuration :{0}", conf);
             return;
         }
 
@@ -125,63 +116,65 @@ public class Extengerator : IIncrementalGenerator
             var sourceCode = string.Format(conf.Template!, replaced);
             context.AddSourceNormalized($"{conf.FileName}.g.cs", sourceCode);
         }
-        catch (ArgumentNullException e)
+        catch (ArgumentNullException)
         {
-            //TODO AK: error handling
-            //conf.Template is null
-            Console.WriteLine(e);
+            ReportConfigurationWarning(context,
+                "Invalid parameter for {0} in configuration {1}",
+                nameof(Configuration.Template),
+                conf);
             throw;
         }
-        catch (FormatException e)
+        catch (FormatException)
         {
-            //TODO AK: error handling
-            //The format item in conf.Template is invalid. or The index of a format item is not zero.
-            Console.WriteLine(e);
+            ReportConfigurationWarning(context,
+                "Invalid format item {0} in configuration {1}. Did you forgot to escape '{' with '{{' for source code?",
+                nameof(Configuration.Template),
+                conf);
             throw;
         }
     }
 
     private static string ApplyReplacer(SourceProductionContext context,
-        ImmutableArray<Target> typeList, 
+        ImmutableArray<Target> typeList,
         string replacer,
         string interfaceType)
     {
         StringBuilder builder = new();
-        
+
         // ReSharper disable once ForCanBeConvertedToForeach
         for (var i = 0; i < typeList.Length; ++i)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
-                
+
             var target = typeList[i];
             if (!target.Interfaces.Contains(interfaceType))
                 continue;
 
-            //TODO AK: error handling
             try
             {
                 builder.AppendFormat(replacer, target.Class);
             }
-            catch (ArgumentNullException e)
+            catch (ArgumentNullException)
             {
-                //TODO AK: error handling
-                //replacer is null
-                Console.WriteLine(e);
-                throw;
+                ReportConfigurationWarning(context,
+                    "Failed processing of configuration.",
+                    "Invalid parameter for {0}. Received: '{1}'",
+                    nameof(Configuration.Replacer),
+                    replacer);
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
-                //TODO AK: error handling
-                //The format item in replacer is invalid. or The index of a format item is not zero.
-                Console.WriteLine(e);
-                throw;
+                ReportConfigurationWarning(context,
+                    "Invalid format item {0}. Received: '{1}'. Did you forgot to escape '{' with '{{' for source code?",
+                    nameof(Configuration.Replacer),
+                    replacer);
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (ArgumentOutOfRangeException)
             {
-                //TODO AK: error handling
-                //The length of the expanded string would exceed MaxCapacity.
-                Console.WriteLine(e);
-                throw;
+                ReportConfigurationWarning(context,
+                    "Applying replacer `{1} would result in the length of the expanded string exceeding MaxCapacity.",
+                    nameof(Configuration.Replacer),
+                    replacer);
             }
         }
 
@@ -190,20 +183,37 @@ public class Extengerator : IIncrementalGenerator
 
     #endregion
 
-    // private static void ReportWarning(SourceProductionContext context, (string Name, bool Warn, bool Valid) api)
-    // {
-    //     // Write error out if no constructors have zero parameters
-    //
-    //     //TOOD AK: we do n't have any warnings here
-    //     context.ReportDiagnostic(Diagnostic.Create(
-    //         new DiagnosticDescriptor(
-    //             "SG0001",
-    //             "Api Classes should have an empty constructor",
-    //             "Cannot register {0} class without an empty constructor. Using state {0} class's constructor will create an unintentional singleton",
-    //             "Problem",
-    //             DiagnosticSeverity.Warning,
-    //             true),
-    //         Location.None,
-    //         api.Name));
-    // }
+    #region Error Reporting
+
+    private static void ReportSettingsWarning(SourceProductionContext context, string message,
+        params object?[]? args)
+    {
+        context.ReportDiagnostic(Diagnostic.Create(
+            new DiagnosticDescriptor(
+                "EG0001",
+                "Error in additional file 'Extengerator.settings.yaml'",
+                message,
+                "Problem",
+                DiagnosticSeverity.Warning,
+                true),
+            Location.None,
+            args));
+    }
+
+    private static void ReportConfigurationWarning(SourceProductionContext context, string message,
+        params object?[]? args)
+    {
+        context.ReportDiagnostic(Diagnostic.Create(
+            new DiagnosticDescriptor(
+                "EG0002",
+                "Failed processing of configuration.",
+                message,
+                "Problem",
+                DiagnosticSeverity.Warning,
+                true),
+            Location.None,
+            args));
+    }
+
+    #endregion
 }
