@@ -1,6 +1,6 @@
 using Common.Collections.Generic;
 
-namespace Extengerator;
+namespace Extengerator.Models;
 
 internal readonly record struct Configuration(
     string? InterfaceType,

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Extengerator;
+namespace Extengerator.Models;
 
 internal readonly record struct Target(string Class, IEnumerable<string> Interfaces, bool IsValid = true)
 {

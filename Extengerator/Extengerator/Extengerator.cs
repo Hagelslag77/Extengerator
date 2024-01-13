@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Extengerator.Common.CodeAnalysis;
+using Extengerator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
