@@ -19,6 +19,8 @@
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0-preview-23577-04" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="NUnit" Version="4.0.1" />
+        <PackageReference Include="Verify.NUnit" Version="22.11.5" />
+        <PackageReference Include="Verify.SourceGenerators" Version="2.2.0" />
         <PackageReference Include="xunit" Version="2.6.4" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -28,6 +30,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Extengerator\Extengerator.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Utils\Snapshots\" />
     </ItemGroup>
 
 
