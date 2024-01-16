@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Extengerator.Tests.Utils;
@@ -49,46 +48,69 @@ public class ExtengeratorTests
     }
 
     [Test]
-    public void ItHandlesNoAdditionalFileSet()
+    public Task ItProducesNoOutputIfAdditionalFileNotIsSet()
     {
         // Arrange
-        var driver = CSharpGeneratorDriver.Create(_generator);
-        _compilation = CSharpCompilation.Create(nameof(ExtengeratorTests));
-
-        // Act
-        driver.RunGeneratorsAndUpdateCompilation(_compilation,
-            out var newCompilation,
-            out var diagnostics);
+        var sources = new[]{
+            TestInterface,
+            TestClass1,
+        };
         
-        var generatedFiles = newCompilation.SyntaxTrees
-            .Select(t => Path.GetFileName(t.FilePath))
-            .ToArray();
+        IEnumerable<AdditionalText>? additionalTexts = null;
+        
+        // Act
+        var actual = Act(additionalTexts,sources);
         
         // Assert
-        Assert.Multiple(() =>
+        // there's no verified snapshot for this since, since no output is expected
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
+    
+    [Test]
+    public Task ItProducesNoOutputIfAdditionalFileIsEmpty()
+    {
+        // Arrange
+        var sources = new[]{
+            TestInterface,
+            TestClass1,
+        };
+
+        const string configuration = "";
+        
+        // Act
+        var actual = Act(configuration, sources);
+        
+        // Assert
+        // there's no verified snapshot for this since, since no output is expected
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
+
+
+    [Test]
+    public Task ItProducesAWarningIfAdditionalFileIsNotFound()
+    {
+        // Arrange
+        var sources = new[]{
+            TestInterface,
+            TestClass1,
+        };
+        
+        IEnumerable<AdditionalText>? additionalTexts = new[] 
         {
-            Assert.That(diagnostics, Is.Empty);
-            Assert.That(generatedFiles, Is.Empty);
-        });
-
-    }
-    
-    
-    [Test]
-    public void ItHandlesAdditionalFileNotFound()
-    {
-        Assert.Fail();
-    }
-    
-    [Test]
-    public void ItHandlesEmptyAdditionalFile()
-    {
-        // Arrange
-
+            new TestAdditionalFile("./Extengerator.settings.yaml", null)
+        };
+        
         // Act
-
+        var actual = Act(additionalTexts,sources);
+        
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
     
     [Test]
