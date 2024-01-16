@@ -28,13 +28,12 @@ public class Extengerator : IIncrementalGenerator
         context.RegisterSourceOutput(namesAndContents.Combine(apiClasses), GenerateCode);
     }
 
-    private static IncrementalValuesProvider<string> CreateAdditionalTextProvider(Context context)
+    private static IncrementalValuesProvider<string?> CreateAdditionalTextProvider(Context context)
     {
         return context.AdditionalTextsProvider
             .Where(a => a.Path.EndsWith("Extengerator.settings.yaml"))
             .Select((text, cancellationToken)
-                => text.GetText(cancellationToken)?.ToString())
-            .Where(content => content is not null)!;
+                => text.GetText(cancellationToken)?.ToString());
     }
 
     private static IncrementalValueProvider<ImmutableArray<Target>> CreateSyntaxProvider(Context context)
@@ -64,11 +63,17 @@ public class Extengerator : IIncrementalGenerator
     #region Generation
 
     private static void GenerateCode(SourceProductionContext context,
-        (string content, ImmutableArray<Target> typeList) arg)
+        (string? content, ImmutableArray<Target> typeList) arg)
     {
         var typeList = arg.typeList;
         if (typeList.IsDefaultOrEmpty)
             return;
+
+        if (arg.content is null)
+        {
+            ReportConfigurationWarning(context, "Configuration 'Extengerator.settings.yaml' not found.");
+            return;
+        }
 
         var configurations = DeserializeAdditionalText(context, arg.content);
         if (configurations is null)
