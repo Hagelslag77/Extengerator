@@ -247,6 +247,12 @@ public class ExtengeratorTests
     
     private GeneratorDriver Act(string configuration, params string[]? sources)
     {
+        var additionalTexts = new[] {new TestAdditionalFile("./Extengerator.settings.yaml", configuration)};
+        return Act(additionalTexts, sources);
+    }
+    
+    private GeneratorDriver Act(IEnumerable<AdditionalText>? additionalTexts, params string[]? sources)
+    {
         var syntaxTrees = sources?.Select(s => CSharpSyntaxTree.ParseText(s));
         
         var compilation = CSharpCompilation.Create(
@@ -255,10 +261,6 @@ public class ExtengeratorTests
             references: _references);
 
         var generators = new[] {_generator}.Select(GeneratorExtensions.AsSourceGenerator);
-        var additionalTexts = new[]
-        {
-            new TestAdditionalFile("./Extengerator.settings.yaml", configuration)
-        };
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generators, additionalTexts);
 
         return driver.RunGenerators(compilation);
