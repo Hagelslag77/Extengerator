@@ -10,37 +10,68 @@ using VerifyNUnit;
 namespace Extengerator.Tests;
 
 [TestFixture]
-public class ExtengeratorTests 
+public class ExtengeratorTests
 {
-
-    private Extengerator _generator = null!; //TODO AK: remove?
-    private CSharpCompilation _compilation = null!; //TODO AK: remove?
-    
+    private Extengerator _generator = null!; 
     private IEnumerable<PortableExecutableReference> _references = null!;
 
-    
+
     private const string SnapShotDirectory = "Snapshots";
 
+    //TODO AK: check which test classes are used in one file only and  move them to the test function itself
     /*language=c#*/
-    private const string TestInterface = 
+    private const string TestInterface =
         """
         namespace Test;
         public interface ITest {}
         """;
-    
+
     /*language=c#*/
     private const string TestClass1 =
         """
         using namespace Test;
         public  class Test1 : ITest {};
         """;
+    
+    /*language=c#*/
+    private const string DerivedFromTestClass1 =
+        """
+        using namespace Test;
+        public  class TestDerived : Test1 {};
+        """;
+    
+    /*language=c#*/
+    private const string TestClassWithoutInterface =
+        """
+        using namespace Test;
+        public class TestWithoutInterface : {};
+        """;
+
+    /*language=c#*/
+    private const string AbstractTestClass =
+        """
+        using namespace Test;
+        public abstract class AbtractTest : ITest {};
+        """;
+
+    /*language=yaml*/
+    private const string SimpleConfiguration =
+        """
+        - interfaceType: Test.ITest
+          template: |-
+            namespace Test
+            {{
+              {0}
+            }}
+          replacer:
+            - '//{0};'
+          fileName: TestItCreatesSource
+        """;
 
     [SetUp]
     public void SetUp()
     {
         _generator = new Extengerator();
-        _compilation = CSharpCompilation.Create(nameof(ExtengeratorTests));
-
         _references = new[]
         {
             MetadataReference.CreateFromFile(typeof(object).Assembly.Location)
@@ -51,37 +82,39 @@ public class ExtengeratorTests
     public Task ItProducesNoOutputIfAdditionalFileNotIsSet()
     {
         // Arrange
-        var sources = new[]{
+        var sources = new[]
+        {
             TestInterface,
             TestClass1,
         };
-        
+
         IEnumerable<AdditionalText>? additionalTexts = null;
-        
+
         // Act
-        var actual = Act(additionalTexts,sources);
-        
+        var actual = Act(additionalTexts, sources);
+
         // Assert
         // there's no verified snapshot for this since, since no output is expected
         return Verifier
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItProducesNoOutputIfAdditionalFileIsEmpty()
     {
         // Arrange
-        var sources = new[]{
+        var sources = new[]
+        {
             TestInterface,
             TestClass1,
         };
 
         const string configuration = "";
-        
+
         // Act
         var actual = Act(configuration, sources);
-        
+
         // Assert
         // there's no verified snapshot for this since, since no output is expected
         return Verifier
@@ -89,61 +122,83 @@ public class ExtengeratorTests
             .UseDirectory(SnapShotDirectory);
     }
 
-
     [Test]
     public Task ItProducesAWarningIfAdditionalFileIsNotFound()
     {
         // Arrange
-        var sources = new[]{
+        var sources = new[]
+        {
             TestInterface,
             TestClass1,
         };
-        
-        IEnumerable<AdditionalText>? additionalTexts = new[] 
+
+        IEnumerable<AdditionalText>? additionalTexts = new[]
         {
             new TestAdditionalFile("./Extengerator.settings.yaml", null)
         };
-        
+
         // Act
-        var actual = Act(additionalTexts,sources);
-        
+        var actual = Act(additionalTexts, sources);
+
         // Assert
         return Verifier
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
-    public void ItHandlesNoInterfacesFound()
+    public Task ItProducesNoOutputIfTheProjectHasNoClassImplementingAnInterface()
     {
         // Arrange
+        var sources = new[] {TestClassWithoutInterface};
 
         // Act
+        var actual = Act(SimpleConfiguration, sources);
 
         // Assert
-        Assert.Fail();
+        // there's no verified snapshot for this since, since no output is expected
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
-    public void ItHandlesEmptyConfigurationFile()
+    public Task ItProducesNoOutputIfNoClassImplementsTheInterface()
     {
         // Arrange
-
+        var sources = new[]
+        {
+            TestInterface,
+            TestClassWithoutInterface,
+        };
+        
         // Act
+        var actual = Act(SimpleConfiguration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
-    public void ItIgnoresAbstractClasses()
+    public Task ItIgnoresAbstractClasses()
     {
         // Arrange
-
+        var sources = new[]
+        {
+            TestInterface,
+            AbstractTestClass,
+            TestClass1,
+        };
+        
         // Act
+        var actual = Act(SimpleConfiguration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
     
     [Test]
@@ -156,7 +211,7 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-    
+
     [Test]
     public void ItHandlesConfigurationDeserializationError()
     {
@@ -168,7 +223,7 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-    
+
     [Test]
     public void ItHandlesMissingValuesInConfiguration()
     {
@@ -179,7 +234,7 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-    
+
     [Test]
     public void ItHandlesWrong_StringFormat_OfTemplate()
     {
@@ -190,7 +245,7 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-    
+
     [Test]
     public void ItIgnoresFilesNotDerivedFromInterface()
     {
@@ -201,7 +256,7 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-    
+
     [Test]
     public void ItHandlesWrong_AppendFormat_OfReplacer()
     {
@@ -217,28 +272,15 @@ public class ExtengeratorTests
     public Task ItCreatesSource()
     {
         // Arrange
-        var sources = new[]{
+        var sources = new[]
+        {
             TestInterface,
             TestClass1,
         };
-
-        /*language=yaml*/
-        const string configuration =
-            """
-            - interfaceType: Test.ITest
-              template: |-
-                namespace Test
-                {{
-                  {0}
-                }}
-              replacer:
-                - '//{0};'
-              fileName: TestItCreatesSource
-            """;
         
         // Act
-        var actual = Act(configuration, sources);
-        
+        var actual = Act(SimpleConfiguration, sources);
+
         // Assert
         return Verifier
             .Verify(actual)
@@ -255,7 +297,7 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-    
+
     [Test]
     public void ItHandlesMultipleReplacers()
     {
@@ -266,17 +308,17 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-    
+
     private GeneratorDriver Act(string configuration, params string[]? sources)
     {
         var additionalTexts = new[] {new TestAdditionalFile("./Extengerator.settings.yaml", configuration)};
         return Act(additionalTexts, sources);
     }
-    
+
     private GeneratorDriver Act(IEnumerable<AdditionalText>? additionalTexts, params string[]? sources)
     {
         var syntaxTrees = sources?.Select(s => CSharpSyntaxTree.ParseText(s));
-        
+
         var compilation = CSharpCompilation.Create(
             assemblyName: "Tests",
             syntaxTrees: syntaxTrees,
