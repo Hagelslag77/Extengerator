@@ -202,14 +202,23 @@ public class ExtengeratorTests
     }
     
     [Test]
-    public void ItHandlesClassesThatHasAGrandParentDerivingFromTheInterface()
+    public Task ItDoesNotProduceOutputForClassesWithABaseClassImplementingTheInterface()
     {
         // Arrange
-
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+            DerivedFromTestClass1
+        };
+        
         // Act
+        var actual = Act(SimpleConfiguration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
 
     [Test]
@@ -223,16 +232,155 @@ public class ExtengeratorTests
         // Assert
         Assert.Fail();
     }
-
+    
     [Test]
-    public void ItHandlesMissingValuesInConfiguration()
+    public Task ItHandlesMissingInterfaceTypeInConfiguration()
     {
         // Arrange
-
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+        
+        /*language=yaml*/
+        const string configuration = """
+                                       - template: |-
+                                             namespace Test
+                                             {{
+                                               {0}
+                                             }}
+                                         replacer:
+                                          - '//{0};'
+                                         fileName: TestItCreatesSource
+                                     """;
+        
         // Act
+        var actual = Act(configuration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
+    
+    [Test]
+    public Task ItHandlesMissingTemplateInConfiguration()
+    {
+        // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+        
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       replacer:
+                                         - '//{0};'
+                                       fileName: TestItCreatesSource
+                                     """;
+        
+        // Act
+        var actual = Act(configuration, sources);
+
+        // Assert
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
+    
+    [Test]
+    public Task ItHandlesMissingReplacerInConfiguration()
+    {
+        // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+        
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                         }}
+                                       fileName: TestItCreatesSource
+                                     """;
+        
+        // Act
+        var actual = Act(configuration, sources);
+
+        // Assert
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
+    
+    [Test]
+    public Task ItHandlesEmptyReplacerInConfiguration()
+    {
+        // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+        
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                         }}
+                                       replacer:
+                                       fileName: TestItCreatesSource
+                                     """;
+        
+        // Act
+        var actual = Act(configuration, sources);
+
+        // Assert
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
+    
+    [Test]
+    public Task ItHandlesMissingFileNameInConfiguration()
+    {
+        // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+        
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                         }}
+                                       replacer:
+                                         - '//{0};'
+                                     """;
+        
+        // Act
+        var actual = Act(configuration, sources);
+
+        // Assert
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
 
     [Test]

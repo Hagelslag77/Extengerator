@@ -1,0 +1,14 @@
+﻿{
+  Diagnostics: [
+    {
+      Id: EG0001,
+      Title: Error in additional file 'Extengerator.settings.yaml',
+      Severity: Warning,
+      WarningLevel: 1,
+      Location: : (0,0)-(0,0),
+      MessageFormat: Invalid configuration: {0},
+      Message: Invalid configuration: Configuration { InterfaceType = , Template = namespace Test {{   {0} }}, Replacer = {//{0};}, FileName = TestItCreatesSource},
+      Category: Problem
+    }
+  ]
+}
