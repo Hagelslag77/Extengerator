@@ -55,7 +55,7 @@ public class Extengerator : IIncrementalGenerator
         if (symbol is null || symbol.IsAbstract || !symbol.AllInterfaces.Any())
             return Target.DefaultError;
 
-        return new Target(symbol.ToDisplayString(), symbol.AllInterfaces.Select(i => i.ToDisplayString()));
+        return new Target(symbol.ToDisplayString(), symbol.Interfaces.Select(i => i.ToDisplayString()));
     }
 
     #endregion
