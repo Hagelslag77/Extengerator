@@ -1,4 +1,5 @@
 using Common.Collections.Generic;
+using Extengerator.Common.Helper;
 
 namespace Extengerator.Models;
 
@@ -14,5 +15,12 @@ internal readonly record struct Configuration(
                && !Template.IsNullOrEmpty()
                && !Replacer.IsNullOrEmpty()
                && !FileName.IsNullOrEmpty();
+    }
+
+    public override string ToString()
+    {
+        var replacer = Replacer is null ? null : $"{{{string.Join(",", Replacer).ReplaceLineBreaks(" ")}}}";
+        return
+            $"Configuration {{ InterfaceType = {InterfaceType}, Template = {Template?.ReplaceLineBreaks(" ")}, Replacer = {replacer}, FileName = {FileName}}}";
     }
 }
