@@ -109,7 +109,7 @@ public class Extengerator : IIncrementalGenerator
 
         if (!conf.IsValid())
         {
-            ReportSettingsWarning(context, "Invalid configuration :{0}", conf);
+            ReportSettingsWarning(context, "Invalid configuration: {0}", conf);
             return;
         }
 
