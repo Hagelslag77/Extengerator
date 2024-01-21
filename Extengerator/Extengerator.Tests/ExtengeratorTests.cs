@@ -64,7 +64,7 @@ public class ExtengeratorTests
               {0}
             }}
           replacer:
-            - '//{0};'
+            - //{0};
           fileName: TestSource
         """;
 
@@ -251,7 +251,7 @@ public class ExtengeratorTests
                                                {0}
                                              }}
                                          replacer:
-                                          - '//{0};'
+                                          - //{0};
                                          fileName: TestSource
                                      """;
         
@@ -278,7 +278,7 @@ public class ExtengeratorTests
         const string configuration = """
                                      - interfaceType: Test.ITest
                                        replacer:
-                                         - '//{0};'
+                                         - //{0};
                                        fileName: TestSource
                                      """;
         
@@ -371,7 +371,7 @@ public class ExtengeratorTests
                                            {0}
                                          }}
                                        replacer:
-                                         - '//{0};'
+                                         - //{0};
                                      """;
         
         // Act
@@ -402,7 +402,39 @@ public class ExtengeratorTests
                                            {0}
                                          }
                                        replacer:
-                                         - '//{0};'
+                                         - //{0};
+                                       fileName: TestSource
+                                     """;
+        
+        // Act
+        var actual = Act(configuration, sources);
+
+        // Assert
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
+    
+    [Test]
+    public Task ItProducesAWarningIfReplacerFormatStringIsMalformed()
+    {
+        // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+        
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                         }}
+                                       replacer:
+                                         - //{0};
                                        fileName: TestSource
                                      """;
         
@@ -417,17 +449,6 @@ public class ExtengeratorTests
 
     [Test]
     public void ItIgnoresFilesNotDerivedFromInterface()
-    {
-        // Arrange
-
-        // Act
-
-        // Assert
-        Assert.Fail();
-    }
-
-    [Test]
-    public void ItHandlesWrong_AppendFormat_OfReplacer()
     {
         // Arrange
 
