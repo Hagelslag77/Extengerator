@@ -384,7 +384,7 @@ public class ExtengeratorTests
     }
 
     [Test]
-    public Task ItProducesAWarningIfFormatStringIsMalformed()
+    public Task ItProducesAWarningIfTemplateFormatStringIsMalformed()
     {
         // Arrange
         var sources = new[]
