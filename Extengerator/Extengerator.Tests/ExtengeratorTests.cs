@@ -384,14 +384,35 @@ public class ExtengeratorTests
     }
 
     [Test]
-    public void ItHandlesWrong_StringFormat_OfTemplate()
+    public Task ItProducesAWarningIfFormatStringIsMalformed()
     {
         // Arrange
-
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+        
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {
+                                           {0}
+                                         }
+                                       replacer:
+                                         - '//{0};'
+                                       fileName: TestSource
+                                     """;
+        
         // Act
+        var actual = Act(configuration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
 
     [Test]

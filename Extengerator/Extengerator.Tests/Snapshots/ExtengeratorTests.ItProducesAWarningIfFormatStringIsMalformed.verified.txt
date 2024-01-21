@@ -1,0 +1,14 @@
+﻿{
+  Diagnostics: [
+    {
+      Id: EG0002,
+      Title: Failed processing of configuration.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Location: : (0,0)-(0,0),
+      MessageFormat: Invalid format item '{0}' in configuration {1}.  Did you forgot to escape '{{' with '{{{{' for source code?,
+      Message: Invalid format item 'Template' in configuration Configuration { InterfaceType = Test.ITest, Template = namespace Test {   {0} }, Replacer = {//{0};}, FileName = TestSource}.  Did you forgot to escape '{' with '{{' for source code?,
+      Category: Problem
+    }
+  ]
+}
