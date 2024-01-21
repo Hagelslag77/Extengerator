@@ -65,7 +65,7 @@ public class ExtengeratorTests
             }}
           replacer:
             - '//{0};'
-          fileName: TestItCreatesSource
+          fileName: TestSource
         """;
 
     [SetUp]
@@ -234,7 +234,7 @@ public class ExtengeratorTests
     }
     
     [Test]
-    public Task ItHandlesMissingInterfaceTypeInConfiguration()
+    public Task ItProducesAWarningIfInterfaceTypeIsMissingInConfiguration()
     {
         // Arrange
         var sources = new[]
@@ -252,7 +252,7 @@ public class ExtengeratorTests
                                              }}
                                          replacer:
                                           - '//{0};'
-                                         fileName: TestItCreatesSource
+                                         fileName: TestSource
                                      """;
         
         // Act
@@ -265,7 +265,7 @@ public class ExtengeratorTests
     }
     
     [Test]
-    public Task ItHandlesMissingTemplateInConfiguration()
+    public Task ItProducesAWarningIfTemplateIsMissingInConfiguration()
     {
         // Arrange
         var sources = new[]
@@ -279,7 +279,7 @@ public class ExtengeratorTests
                                      - interfaceType: Test.ITest
                                        replacer:
                                          - '//{0};'
-                                       fileName: TestItCreatesSource
+                                       fileName: TestSource
                                      """;
         
         // Act
@@ -292,7 +292,7 @@ public class ExtengeratorTests
     }
     
     [Test]
-    public Task ItHandlesMissingReplacerInConfiguration()
+    public Task ItProducesAWarningIfReplacerIsMissingInConfiguration()
     {
         // Arrange
         var sources = new[]
@@ -309,7 +309,7 @@ public class ExtengeratorTests
                                          {{
                                            {0}
                                          }}
-                                       fileName: TestItCreatesSource
+                                       fileName: TestSource
                                      """;
         
         // Act
@@ -322,7 +322,7 @@ public class ExtengeratorTests
     }
     
     [Test]
-    public Task ItHandlesEmptyReplacerInConfiguration()
+    public Task ItProducesAWarningIfReplacerIsEmptyInConfiguration()
     {
         // Arrange
         var sources = new[]
@@ -340,7 +340,7 @@ public class ExtengeratorTests
                                            {0}
                                          }}
                                        replacer:
-                                       fileName: TestItCreatesSource
+                                       fileName: TestSource
                                      """;
         
         // Act
@@ -353,7 +353,7 @@ public class ExtengeratorTests
     }
     
     [Test]
-    public Task ItHandlesMissingFileNameInConfiguration()
+    public Task ItProducesAWarningIfFileNameIsMissingInConfiguration()
     {
         // Arrange
         var sources = new[]
