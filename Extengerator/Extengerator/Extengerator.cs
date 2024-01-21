@@ -133,10 +133,9 @@ public class Extengerator : IIncrementalGenerator
         catch (FormatException)
         {
             ReportConfigurationWarning(context,
-                "Invalid format item {0} in configuration {1}. Did you forgot to escape '{' with '{{' for source code?",
+                "Invalid format item '{0}' in configuration {1}.  Did you forgot to escape '{{' with '{{{{' for source code?",
                 nameof(Configuration.Template),
                 conf);
-            throw;
         }
     }
 
@@ -160,7 +159,7 @@ public class Extengerator : IIncrementalGenerator
             {
                 builder.AppendFormat(replacer, target.Class);
             }
-            catch (ArgumentNullException)
+            catch (ArgumentNullException e)
             {
                 ReportConfigurationWarning(context,
                     "Failed processing of configuration.",
@@ -171,14 +170,14 @@ public class Extengerator : IIncrementalGenerator
             catch (FormatException)
             {
                 ReportConfigurationWarning(context,
-                    "Invalid format item {0}. Received: '{1}'. Did you forgot to escape '{' with '{{' for source code?",
+                    "Invalid format item '{0}'. Received: '{1}'. Did you forgot to escape '{{' with '{{{{' for source code?",
                     nameof(Configuration.Replacer),
                     replacer);
             }
             catch (ArgumentOutOfRangeException)
             {
                 ReportConfigurationWarning(context,
-                    "Applying replacer `{1} would result in the length of the expanded string exceeding MaxCapacity.",
+                    "Applying replacer '{0}' would result in the length of the expanded string exceeding MaxCapacity.",
                     nameof(Configuration.Replacer),
                     replacer);
             }
