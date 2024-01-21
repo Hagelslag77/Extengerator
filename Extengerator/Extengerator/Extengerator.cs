@@ -159,7 +159,7 @@ public class Extengerator : IIncrementalGenerator
             {
                 builder.AppendFormat(replacer, target.Class);
             }
-            catch (ArgumentNullException e)
+            catch (ArgumentNullException)
             {
                 ReportConfigurationWarning(context,
                     "Failed processing of configuration.",
