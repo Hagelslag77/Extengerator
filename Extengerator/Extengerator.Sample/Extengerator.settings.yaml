@@ -13,7 +13,7 @@
       }}
     }} 
   replacer:
-    - 'extend.AddResponseFilterLast(container.Instantiate<{0}>());'
+    - extend.AddResponseFilterLast(container.Instantiate<{0}>());
   fileName: ResponseFilterReceiverExtensions
 - interfaceType: Api.OGame.ResponseFilters.IResponseFilter
   template: |-
@@ -34,6 +34,6 @@
     {1}
     */
   replacer:
-    - 'extend.AddResponseFilterFirst(container.Instantiate<{0}>());'
-    - 'added class {0}'
+    - extend.AddResponseFilterFirst(container.Instantiate<{0}>());
+    - added new class {0}
   fileName: ResponseFilterReceiverExtensions3
