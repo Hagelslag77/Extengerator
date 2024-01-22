@@ -162,7 +162,6 @@ public class Extengerator : IIncrementalGenerator
             catch (ArgumentNullException)
             {
                 ReportConfigurationWarning(context,
-                    "Failed processing of configuration.",
                     "Invalid parameter for {0}. Received: '{1}'",
                     nameof(Configuration.Replacer),
                     replacer);
