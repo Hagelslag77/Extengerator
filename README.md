@@ -2,7 +2,6 @@
 
 ## Todos
 
-- unit tests
 - (more) samples
   - register with DI (ISingleton, ITransient, ...)
   - create class (new or DI) and register with something
