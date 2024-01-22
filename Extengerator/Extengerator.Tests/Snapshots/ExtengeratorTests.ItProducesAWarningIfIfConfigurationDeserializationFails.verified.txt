@@ -1,0 +1,14 @@
+﻿{
+  Diagnostics: [
+    {
+      Id: EG0001,
+      Title: Error in additional file 'Extengerator.settings.yaml',
+      Severity: Warning,
+      WarningLevel: 1,
+      Location: : (0,0)-(0,0),
+      MessageFormat: Exception during deserialization,
+      Message: Exception during deserialization,
+      Category: Problem
+    }
+  ]
+}

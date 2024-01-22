@@ -12,13 +12,11 @@ namespace Extengerator.Tests;
 [TestFixture]
 public class ExtengeratorTests
 {
-    private Extengerator _generator = null!; 
+    private Extengerator _generator = null!;
     private IEnumerable<PortableExecutableReference> _references = null!;
-
 
     private const string SnapShotDirectory = "Snapshots";
 
-    //TODO AK: check which test classes are used in one file only and  move them to the test function itself
     /*language=c#*/
     private const string TestInterface =
         """
@@ -32,14 +30,7 @@ public class ExtengeratorTests
         using namespace Test;
         public  class Test1 : ITest {};
         """;
-    
-    /*language=c#*/
-    private const string DerivedFromTestClass1 =
-        """
-        using namespace Test;
-        public  class TestDerived : Test1 {};
-        """;
-    
+
     /*language=c#*/
     private const string TestClassWithoutInterface =
         """
@@ -48,10 +39,17 @@ public class ExtengeratorTests
         """;
 
     /*language=c#*/
-    private const string AbstractTestClass =
+    private const string OtherTestInterface =
+        """
+        namespace Test;
+        public interface IOtherTest {}
+        """;
+
+    /*language=c#*/
+    private const string OtherTestClass =
         """
         using namespace Test;
-        public abstract class AbtractTest : ITest {};
+        public  class OtherTest : IOtherTest {};
         """;
 
     /*language=yaml*/
@@ -171,7 +169,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClassWithoutInterface,
         };
-        
+
         // Act
         var actual = Act(SimpleConfiguration, sources);
 
@@ -185,13 +183,20 @@ public class ExtengeratorTests
     public Task ItIgnoresAbstractClasses()
     {
         // Arrange
+        /*language=c#*/
+        const string abstractTestClass =
+            """
+            using namespace Test;
+            public abstract class AbtractTest : ITest {};
+            """;
+
         var sources = new[]
         {
             TestInterface,
-            AbstractTestClass,
+            abstractTestClass,
             TestClass1,
         };
-        
+
         // Act
         var actual = Act(SimpleConfiguration, sources);
 
@@ -200,18 +205,25 @@ public class ExtengeratorTests
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItDoesNotProduceOutputForClassesWithABaseClassImplementingTheInterface()
     {
         // Arrange
+        /*language=c#*/
+        const string derivedFromTestClass1 =
+            """
+            using namespace Test;
+            public  class TestDerived : Test1 {};
+            """;
+
         var sources = new[]
         {
             TestInterface,
             TestClass1,
-            DerivedFromTestClass1
+            derivedFromTestClass1
         };
-        
+
         // Act
         var actual = Act(SimpleConfiguration, sources);
 
@@ -222,17 +234,38 @@ public class ExtengeratorTests
     }
 
     [Test]
-    public void ItHandlesConfigurationDeserializationError()
+    public Task ItProducesAWarningIfIfConfigurationDeserializationFails()
     {
-        //TODO AK:here we could have multiple errors (i.e. overall structure or a single element)
         // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                           {1}
+                                         }}
+                                       replacer:
+                                         - // we have an unquoted colon here: {0}
+                                       fileName: TestSource
+                                     """;
 
         // Act
+        var actual = Act(configuration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItProducesAWarningIfInterfaceTypeIsMissingInConfiguration()
     {
@@ -242,7 +275,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         /*language=yaml*/
         const string configuration = """
                                        - template: |-
@@ -254,7 +287,7 @@ public class ExtengeratorTests
                                           - //{0};
                                          fileName: TestSource
                                      """;
-        
+
         // Act
         var actual = Act(configuration, sources);
 
@@ -263,7 +296,7 @@ public class ExtengeratorTests
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItProducesAWarningIfTemplateIsMissingInConfiguration()
     {
@@ -273,7 +306,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         /*language=yaml*/
         const string configuration = """
                                      - interfaceType: Test.ITest
@@ -281,7 +314,7 @@ public class ExtengeratorTests
                                          - //{0};
                                        fileName: TestSource
                                      """;
-        
+
         // Act
         var actual = Act(configuration, sources);
 
@@ -290,7 +323,7 @@ public class ExtengeratorTests
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItProducesAWarningIfReplacerIsMissingInConfiguration()
     {
@@ -300,7 +333,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         /*language=yaml*/
         const string configuration = """
                                      - interfaceType: Test.ITest
@@ -311,7 +344,7 @@ public class ExtengeratorTests
                                          }}
                                        fileName: TestSource
                                      """;
-        
+
         // Act
         var actual = Act(configuration, sources);
 
@@ -320,7 +353,7 @@ public class ExtengeratorTests
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItProducesAWarningIfReplacerIsEmptyInConfiguration()
     {
@@ -330,7 +363,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         /*language=yaml*/
         const string configuration = """
                                      - interfaceType: Test.ITest
@@ -342,7 +375,7 @@ public class ExtengeratorTests
                                        replacer:
                                        fileName: TestSource
                                      """;
-        
+
         // Act
         var actual = Act(configuration, sources);
 
@@ -351,7 +384,7 @@ public class ExtengeratorTests
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItProducesAWarningIfFileNameIsMissingInConfiguration()
     {
@@ -361,7 +394,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         /*language=yaml*/
         const string configuration = """
                                      - interfaceType: Test.ITest
@@ -373,7 +406,7 @@ public class ExtengeratorTests
                                        replacer:
                                          - //{0};
                                      """;
-        
+
         // Act
         var actual = Act(configuration, sources);
 
@@ -392,7 +425,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         /*language=yaml*/
         const string configuration = """
                                      - interfaceType: Test.ITest
@@ -405,7 +438,7 @@ public class ExtengeratorTests
                                          - //{0};
                                        fileName: TestSource
                                      """;
-        
+
         // Act
         var actual = Act(configuration, sources);
 
@@ -414,7 +447,7 @@ public class ExtengeratorTests
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
-    
+
     [Test]
     public Task ItProducesAWarningIfReplacerFormatStringIsMalformed()
     {
@@ -424,7 +457,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         /*language=yaml*/
         const string configuration = """
                                      - interfaceType: Test.ITest
@@ -434,10 +467,10 @@ public class ExtengeratorTests
                                            {0}
                                          }}
                                        replacer:
-                                         - //{0};
+                                         - // Action a = () => { {0}.SomeStaticMethod(); }
                                        fileName: TestSource
                                      """;
-        
+
         // Act
         var actual = Act(configuration, sources);
 
@@ -448,14 +481,22 @@ public class ExtengeratorTests
     }
 
     [Test]
-    public void ItIgnoresFilesNotDerivedFromInterface()
+    public Task ItIgnoresFilesNotDerivedFromInterface()
     {
         // Arrange
+        var sources = new[]
+        {
+            OtherTestInterface,
+            OtherTestClass
+        };
 
         // Act
+        var actual = Act(SimpleConfiguration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
 
     [Test]
@@ -467,7 +508,7 @@ public class ExtengeratorTests
             TestInterface,
             TestClass1,
         };
-        
+
         // Act
         var actual = Act(SimpleConfiguration, sources);
 
@@ -478,26 +519,82 @@ public class ExtengeratorTests
     }
 
     [Test]
-    public void ItHandlesMultipleConfigurationEntries()
+    public Task ItProducesOneSourceFilePerConfigurationEntry()
     {
         // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+            OtherTestInterface,
+            OtherTestClass
+        };
+
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                         }}
+                                       replacer:
+                                         - //{0};
+                                       fileName: TestSource
+                                     - interfaceType: Test.IOtherTest
+                                       template: |-
+                                         namespace OtherTest
+                                         {{
+                                          {0}
+                                         }}
+                                       replacer:
+                                         - //{0};
+                                       fileName: OtherTestSource
+                                     """;
 
         // Act
+        var actual = Act(configuration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
 
     [Test]
-    public void ItHandlesMultipleReplacers()
+    public Task ItProducesSourceCodeWithMultipleReplacers()
     {
         // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                           {1}
+                                         }}
+                                       replacer:
+                                         - // first {0};
+                                         - // second {0};
+                                       fileName: TestSource
+                                     """;
 
         // Act
+        var actual = Act(configuration, sources);
 
         // Assert
-        Assert.Fail();
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
     }
+
 
     private GeneratorDriver Act(string configuration, params string[]? sources)
     {
