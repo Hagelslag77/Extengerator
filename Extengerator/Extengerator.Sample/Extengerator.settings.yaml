@@ -1,4 +1,5 @@
 - interfaceType: Api.OGame.ResponseFilters.IResponseFilter
+  #language=c#
   template: |-
     using Zenject;
 
@@ -12,10 +13,12 @@
           }}
       }}
     }} 
+  #language=c#
   replacer:
     - extend.AddResponseFilterLast(container.Instantiate<{0}>());
   fileName: ResponseFilterReceiverExtensions
 - interfaceType: Api.OGame.ResponseFilters.IResponseFilter
+  #language=c#
   template: |-
     using Zenject;
 
@@ -33,6 +36,7 @@
     /*
     {1}
     */
+  #language=c#
   replacer:
     - extend.AddResponseFilterFirst(container.Instantiate<{0}>());
     - added new class {0}
