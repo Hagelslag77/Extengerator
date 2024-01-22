@@ -1,29 +1,14 @@
-using System.Collections.Generic;
-using System.Linq;
-
-// using Entities;
+using Api.OGame.ResponseFilters;
+using Zenject;
 
 namespace Extengerator.Sample;
 
 public class Examples
 {
-    // Create generated entities, based on DDD.UbiquitousLanguageRegistry.txt
-    public object[] CreateEntities()
+
+    public static void DoStuffWithGeneratedCode(IResponseFilterReceiver receiver, DiContainer container)
     {
-        return new object[]
-        {
-            // new Customer(),
-            // new Employee(),
-            // new Product(),
-            // new Shop(),
-            // new Stock()
-        };
+        receiver.AddFilters(container);
     }
 
-    // Execute generated method Report
-    public IEnumerable<string> CreateEntityReport(SampleEntity entity)
-    {
-        return Enumerable.Empty<string>();
-        //return entity.Report();
-    }
 }

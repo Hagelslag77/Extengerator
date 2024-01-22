@@ -9,11 +9,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Extengerator\Extengerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <None Remove="DDD.UbiquitousLanguageRegistry.txt"/>
-        <AdditionalFiles Include="DDD.UbiquitousLanguageRegistry.txt"/>
-    </ItemGroup>
     
     <ItemGroup>
         <None Remove="Extengerator.settings.yaml"/>
