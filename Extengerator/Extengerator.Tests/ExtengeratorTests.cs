@@ -384,6 +384,38 @@ public class ExtengeratorTests
             .Verify(actual)
             .UseDirectory(SnapShotDirectory);
     }
+    
+    [Test]
+    public Task ItProducesAWarningIfReplacerValueIsEmptyInConfiguration()
+    {
+        // Arrange
+        var sources = new[]
+        {
+            TestInterface,
+            TestClass1,
+        };
+
+        /*language=yaml*/
+        const string configuration = """
+                                     - interfaceType: Test.ITest
+                                       template: |-
+                                         namespace Test
+                                         {{
+                                           {0}
+                                         }}
+                                       replacer:
+                                         -
+                                       fileName: TestSource
+                                     """;
+
+        // Act
+        var actual = Act(configuration, sources);
+
+        // Assert
+        return Verifier
+            .Verify(actual)
+            .UseDirectory(SnapShotDirectory);
+    }
 
     [Test]
     public Task ItProducesAWarningIfFileNameIsMissingInConfiguration()

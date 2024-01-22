@@ -1,0 +1,14 @@
+﻿{
+  Diagnostics: [
+    {
+      Id: EG0002,
+      Title: Failed processing of configuration.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Location: : (0,0)-(0,0),
+      MessageFormat: Invalid parameter for {0}. Received: '{1}',
+      Message: Invalid parameter for Replacer. Received: '',
+      Category: Problem
+    }
+  ]
+}
