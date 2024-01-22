@@ -156,8 +156,8 @@ public class Extengerator : IIncrementalGenerator
                 continue;
 
             try
-            {
-                builder.AppendFormat(replacer, target.Class);
+            { 
+                builder.Append(string.Format(replacer, target.Class));
             }
             catch (ArgumentNullException)
             {
