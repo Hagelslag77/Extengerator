@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extengerator.Sample", "Exte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extengerator.Tests", "Extengerator\Extengerator.Tests\Extengerator.Tests.csproj", "{ECE10919-4085-40F1-84A0-518D2CEEEF42}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extengerator.MapEndpointsSample", "Extengerator\Extengerator.MapEndpointsSample\Extengerator.MapEndpointsSample.csproj", "{BEFDB946-B069-47A5-B735-BB0BF701325C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{ECE10919-4085-40F1-84A0-518D2CEEEF42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECE10919-4085-40F1-84A0-518D2CEEEF42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECE10919-4085-40F1-84A0-518D2CEEEF42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEFDB946-B069-47A5-B735-BB0BF701325C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEFDB946-B069-47A5-B735-BB0BF701325C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEFDB946-B069-47A5-B735-BB0BF701325C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEFDB946-B069-47A5-B735-BB0BF701325C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

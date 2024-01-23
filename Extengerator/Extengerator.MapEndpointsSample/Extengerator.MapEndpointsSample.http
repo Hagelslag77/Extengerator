@@ -1,0 +1,6 @@
+@Extengerator.MapEndpointsSample_HostAddress = http://localhost:5048
+
+GET {{Extengerator.MapEndpointsSample_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

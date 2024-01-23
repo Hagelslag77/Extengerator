@@ -1,0 +1,20 @@
+- interfaceType: Extengerator.MapEndpointsSample.Endpoints.IEndpoint
+  #language=c#
+  template: |-
+    using Extengerator.MapEndpointsSample.Endpoints;
+    
+    namespace Extengerator.MapEndpointsSample
+    {{
+      public static partial class EndpointExtensions
+      {{
+          public static void MapEndpoints(this WebApplication app)
+          {{
+             {0}
+          }}
+      }}
+    }} 
+  #language=c#
+  replacer:
+    - new {0}().Map(app);
+  fileName: EndpointExtensionsMapper
+
