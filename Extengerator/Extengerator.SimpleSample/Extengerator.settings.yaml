@@ -1,10 +1,10 @@
-- interfaceType: Extengerator.Sample.EventHandlers.IAutoRegisterHandler
+- interfaceType: Extengerator.SimpleSample.EventHandlers.IAutoRegisterHandler
   #language=c#
   template: |-
-    using Extengerator.Sample.SomeEventBus;
-    using Extengerator.Sample.SomeDependencyInjectionFramework;
+    using Extengerator.SimpleSample.SomeEventBus;
+    using Extengerator.SimpleSample.SomeDependencyInjectionFramework;
 
-    namespace Extengerator.Sample.EventHandlers
+    namespace Extengerator.SimpleSample.EventHandlers
     {{
       public static partial class EventHandlersExtensions
       {{

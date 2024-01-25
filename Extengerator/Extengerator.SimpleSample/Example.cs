@@ -1,9 +1,9 @@
 using System;
-using Extengerator.Sample.EventHandlers;
-using Extengerator.Sample.SomeDependencyInjectionFramework;
-using Extengerator.Sample.SomeEventBus;
+using Extengerator.SimpleSample.EventHandlers;
+using Extengerator.SimpleSample.SomeDependencyInjectionFramework;
+using Extengerator.SimpleSample.SomeEventBus;
 
-namespace Extengerator.Sample;
+namespace Extengerator.SimpleSample;
 
 public sealed class Example : IDisposable
 {

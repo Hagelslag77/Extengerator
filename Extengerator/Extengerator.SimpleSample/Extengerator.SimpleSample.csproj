@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <RootNamespace>Extengerator.Sample</RootNamespace>
+        <RootNamespace>Extengerator.SimpleSample</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

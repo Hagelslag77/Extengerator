@@ -1,4 +1,4 @@
-namespace Extengerator.Sample.EventHandlers;
+namespace Extengerator.SimpleSample.EventHandlers;
 
 public sealed class DerivedHandler: AbstractHandler
 {

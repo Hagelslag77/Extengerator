@@ -1,6 +1,6 @@
-using Extengerator.Sample.SomeEventBus;
+using Extengerator.SimpleSample.SomeEventBus;
 
-namespace Extengerator.Sample.EventHandlers;
+namespace Extengerator.SimpleSample.EventHandlers;
 
 public abstract class AbstractHandler : IEventHandler<bool>, IAutoRegisterHandler
 {

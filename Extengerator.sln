@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extengerator", "Extengerator\Extengerator\Extengerator.csproj", "{38DDB32D-5E0A-449F-8D21-45D67DC1CBB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extengerator.Sample", "Extengerator\Extengerator.Sample\Extengerator.Sample.csproj", "{68847863-4E47-42D1-8E2A-63C587892667}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extengerator.SimpleSample", "Extengerator\Extengerator.SimpleSample\Extengerator.SimpleSample.csproj", "{68847863-4E47-42D1-8E2A-63C587892667}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extengerator.Tests", "Extengerator\Extengerator.Tests\Extengerator.Tests.csproj", "{ECE10919-4085-40F1-84A0-518D2CEEEF42}"
 EndProject

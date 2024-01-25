@@ -1,4 +1,4 @@
-namespace Extengerator.Sample.SomeEventBus;
+namespace Extengerator.SimpleSample.SomeEventBus;
 
 public interface IEventHandler<in TEvent>
 {
