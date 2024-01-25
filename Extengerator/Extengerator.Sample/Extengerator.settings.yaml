@@ -1,43 +1,26 @@
-- interfaceType: Api.OGame.ResponseFilters.IResponseFilter
+- interfaceType: Extengerator.Sample.EventHandlers.IAutoRegisterHandler
   #language=c#
   template: |-
-    using Zenject;
+    using Extengerator.Sample.SomeEventBus;
+    using Extengerator.Sample.SomeDependencyInjectionFramework;
 
-    namespace Api.OGame.ResponseFilters
+    namespace Extengerator.Sample.EventHandlers
     {{
-      public static partial class ResponseFilterReceiverExtensions
+      public static partial class EventHandlersExtensions
       {{
-          public static void AddFilters(this IResponseFilterReceiver extend ,DiContainer container )
-          {{
-             {0}
-          }}
-      }}
-    }} 
-  #language=c#
-  replacer:
-    - extend.AddResponseFilterLast(container.Instantiate<{0}>());
-  fileName: ResponseFilterReceiverExtensions
-- interfaceType: Api.OGame.ResponseFilters.IResponseFilter
-  #language=c#
-  template: |-
-    using Zenject;
-
-    namespace Api.OGame.ResponseFilters
-    {{
-      public static partial class ResponseFilterReceiverExtensions2
-      {{
-        public static void AddFilter2s(this IResponseFilterReceiver extend, DiContainer container )
+        public static void RegisterAllHandlers(this IEventBus eventBus, IContainer container)
         {{
           {0}
         }}
+      
+        public static void DeregisterAllHandlers(this IEventBus eventBus)
+        {{
+          {1}
+        }}
       }}
     }}
-
-    /*
-    {1}
-    */
   #language=c#
   replacer:
-    - extend.AddResponseFilterFirst(container.Instantiate<{0}>());
-    - added new class {0}
-  fileName: ResponseFilterReceiverExtensions3
+    - eventBus.Register(container.Resolve<{0}>());
+    - eventBus.DeregisterAll<{0}>();
+  fileName: EventHandlersExtensions
