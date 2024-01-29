@@ -1,4 +1,11 @@
-- interfaceType: Extengerator.MapEndpointsSample.Endpoints.IEndpoint
+- interfaceType: Extengerator.MapEndpointsSample.Endpoints.IEndpoint  # This is the marker interface. 
+                                                                      # All classes implementing the interface 
+                                                                      # will be part of the generated code
+  # template defines the structure of the generated code.
+  # Each format string entry ('{0}', '{1}', ...) will be replaced by the corresponding replacer
+  # e.g. '{0}' will be replaced by 'eventBus.Register(container.Resolve<{0}>());' for each class implementing the marker interface
+  # Please note that curly brackets need to be escaped for non-format strings.
+  # the '#language=c#' helps JetBrains Rider with C# code highlighting
   #language=c#
   template: |-
     using Extengerator.MapEndpointsSample.Endpoints;
@@ -13,8 +20,11 @@
           }}
       }}
     }} 
+  # For each class explicitly implementing the marker interface, '{0}' of the replacer will be substituted with the class name
+  # and the resulting code will be placed in '{0}' of the template
   #language=c#
   replacer:
     - new {0}().Map(app);
+  # file name is the base (hint) for the generated code. The final name will here will be 'EventHandlersExtensions.g.cs'
   fileName: EndpointExtensionsMapper
 
