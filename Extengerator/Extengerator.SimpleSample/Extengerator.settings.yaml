@@ -1,4 +1,13 @@
-- interfaceType: Extengerator.SimpleSample.EventHandlers.IAutoRegisterHandler
+# Here we have just one entry in the list and thus there will be only one source file generated
+
+- interfaceType: Extengerator.SimpleSample.EventHandlers.IAutoRegisterHandler # This is the marker interface. 
+                                                                              # All classes implementing the interface 
+                                                                              # will be part of the generated code
+  # template defines the structure of the generated code.
+  # Each format string entry ('{0}', '{1}', ...) will be replaced by the corresponding replacer
+  # e.g. '{0}' will be replaced by 'eventBus.Register(container.Resolve<{0}>());' for each class implementing the marker interface
+  # Please note that curly brackets need to be escaped for non-format strings.
+  # the '#language=c#' helps JetBrains Rider with C# code highlighting
   #language=c#
   template: |-
     using Extengerator.SimpleSample.SomeEventBus;
@@ -19,8 +28,12 @@
         }}
       }}
     }}
+  # Each replacer corresponds to exactly one format string item in template
+  # i.e. the first entry to '{0}', the second one to '{1}', the third one to '{2}', etc.
+  # For each class explicitly implementing the marker interface, '{0}' of the replacer entry will be substituted with the class name
   #language=c#
   replacer:
     - eventBus.Register(container.Resolve<{0}>());
     - eventBus.DeregisterAll<{0}>();
+  # file name is the base (hint) for the generated code. The final name will here will be 'EventHandlersExtensions.g.cs'
   fileName: EventHandlersExtensions
