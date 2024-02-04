@@ -2,7 +2,8 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <IsPackable>false</IsPackable>
+        <IsPackable>true</IsPackable>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
 
@@ -11,6 +12,17 @@
 
         <RootNamespace>Extengerator</RootNamespace>
         <PackageId>Extengerator</PackageId>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>1.0.0-beta001</Version>
+        <Title>Extengerator</Title>
+        <Authors>Hagelslag77</Authors>
+        <Description>Yaml configurable Roslyn generator</Description>
+        <Copyright>MIT license</Copyright>
+        <PackageProjectUrl>https://github.com/Hagelslag77/Extengerator</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Hagelslag77/Extengerator?tab=MIT-1-ov-file#readme</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Hagelslag77/Extengerator</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>Roslyn;Code Generation</PackageTags>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,6 +35,15 @@
                           Version="13.7.1"
                           PrivateAssets="all"
                           GeneratePathProperty="true"/>
+        <None Include="$(PKGYamlDotNet)\lib\netstandard2.0\YamlDotNet.dll"
+              Pack="true"
+              PackagePath="analyzers/dotnet/cs"
+              Visible="false" />
+
+        <None Include="$(OutputPath)\$(AssemblyName).dll"
+              Pack="true"
+              PackagePath="analyzers/dotnet/cs"
+              Visible="false" />
     </ItemGroup>
 
     <PropertyGroup>
