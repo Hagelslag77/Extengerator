@@ -19,7 +19,7 @@
         <Description>Yaml configurable Roslyn generator</Description>
         <Copyright>MIT license</Copyright>
         <PackageProjectUrl>https://github.com/Hagelslag77/Extengerator</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/Hagelslag77/Extengerator?tab=MIT-1-ov-file#readme</PackageLicenseUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/Hagelslag77/Extengerator</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>Roslyn;Code Generation</PackageTags>
