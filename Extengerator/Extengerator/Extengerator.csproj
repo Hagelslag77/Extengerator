@@ -23,6 +23,7 @@
         <RepositoryUrl>https://github.com/Hagelslag77/Extengerator</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>Roslyn;Code Generation</PackageTags>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -43,7 +44,9 @@
         <None Include="$(OutputPath)\$(AssemblyName).dll"
               Pack="true"
               PackagePath="analyzers/dotnet/cs"
-              Visible="false" />
+              Visible="false"/>
+
+        <None Include="$(SolutionDir)/README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <PropertyGroup>
